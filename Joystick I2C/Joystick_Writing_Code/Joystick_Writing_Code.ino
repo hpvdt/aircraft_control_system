@@ -2,6 +2,8 @@
 
 int sensorPin = A0;   // select the input pin for the potentiometer
 int sensorPin2 = A1;   // select the input pin for the potentiometer
+int sensorPin3 = A2;
+
 int ledPin = 13;      // select the pin for the LED
 int sensorValue = 0;  // variable to store the value coming from the sensor
 const float slope = (0.00571429);
@@ -21,12 +23,19 @@ void loop() {
   float reading = analogRead(sensorPin);
   reading = reading*slope-yIntercept;
   reading = constrain(reading, -1, 1);
-  int sendReading = (reading + 1 ) * 100;
-  sendingData(sendReading);
+
 
   float reading2 = analogRead(sensorPin2);
   reading2 = reading2*slope-yIntercept;
   reading2 = constrain(reading2,-1, 1);
+
+  float reading3 = analogRead(sensorPin3);
+  reading3 = reading3*(2.0 / 1023.0) - 1;
+
+   
+
+  sendingData(convertResistance(0), convertResistance(1), reading3);
+
 
   Serial.print(convertResistance(0));
   Serial.print(",");
@@ -35,11 +44,26 @@ void loop() {
   delay(100);                // waits for the servo to get there
 }
 
-void sendingData(int reading) {
+void sendingData(float value1, float value2, float value3) {
   Wire.beginTransmission(8);
-  Wire.write(reading);    
-  Serial.println(reading);
-  Wire.endTransmission();    
+
+  char sendValue1[7];
+  dtostrf(value1, 7, 6, sendValue1);
+  Wire.write(sendValue1);
+  Wire.write("c");
+
+  char sendValue2[7];
+  dtostrf(value2, 7, 6, sendValue2);
+  Wire.write(sendValue2);
+  Wire.write("c");
+
+  char sendValue3[7];
+  dtostrf(value3, 7, 6, sendValue3);
+  Wire.write(sendValue3);
+
+  Wire.endTransmission();  
+
+  
 }
 
 float convertResistance(int port) {
