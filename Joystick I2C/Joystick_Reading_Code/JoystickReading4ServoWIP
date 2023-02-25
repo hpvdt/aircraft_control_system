@@ -7,10 +7,10 @@ Servo myservo1;
 Servo myservo2;
 Servo myservo3;
 
-float angle [3] = {0};              // variable to hold the angle for the servo motor
+float angle [4] = {0};              // variable to hold the angle for the servo motor
 float input [3] = {0};
-float matrix [4][3] = {{179, 0, 0},{0,0,0},{0,0,0},{0,0,0}};
-float percent = 0;
+float sum0, sum1, sum2, sum3;
+float matrix [4][3] = {{90, 0, 0},{0,90,0},{0,0,90},{0,90,90}};
 
 float readings[3];
 
@@ -18,18 +18,41 @@ void setup() {
   Wire.begin(8);                // join i2c bus with address #8
   Wire.onReceive(receiveEvent); // function that executes whenever data is received from writer
   Serial.begin(115200); //number of bits per second
-  myservo0.attach(A1);  // attaches the servo on pin 9 to the servo object
-  myservo1.attach(A2);
-  myservo2.attach(A3);
-  myservo3.attach(A0);
+  myservo0.attach(A0);  // attaches the servo on pin 9 to the servo object
+  myservo1.attach(A1);
+  myservo2.attach(A2);
+  myservo3.attach(A3);
 }
 
 void loop() {
   // myservo.write(0);
   // Serial.println(readings[0]);
-  myservo0.write(convertToServo(readings[0]));                  // sets the servo position according to the scaled value
-  myservo1.write(convertToServo(readings[1]));
-  myservo2.write(convertToServo(readings[2]));
+  float percent0 = readings[0] / 1023.0;
+  float percent1 = readings[1] / 1023.0;
+  float percent2 = readings[2] / 1023.0;
+  float percent3 = readings[3] / 1023.0;
+
+ for (int i = 1; i < 4; i++) {
+    Serial.println(i);
+     sum0 += matrix[0][i] * readings[0];
+     sum1 += matrix[1][i] * readings[1];
+     sum2 += matrix[2][i] * readings[2];
+     sum3 += matrix[3][i] * readings[3];
+   }
+   angle[0] = sum0;
+   angle[1] = sum1;
+   angle[2] = sum2;
+   angle[3] = sum3;
+   
+   Serial.println(angle[0]);
+   Serial.println(angle[1]);
+   Serial.println(angle[2]);
+   Serial.println(angle[3]);
+   
+  myservo0.write(angle[0]);                  // sets the servo position according to the scaled value
+  myservo1.write(angle[1]);
+  myservo2.write(angle[2]);
+  myservo3.write(angle[3]);
   
   delay(100);
 }
@@ -77,7 +100,7 @@ void receiveEvent() {
  
 }
 
-float convertToServo(float reading) {
+/* float convertToServo(float reading) {
   // Serial.println((reading / 100 - 1) * 90  + 90);
   return (reading * 90 + 89);
-}
+} */
